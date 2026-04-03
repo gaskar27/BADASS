@@ -16,3 +16,13 @@ Go to the directory containing the Dockerfile and run the following command:
 ```bash
 docker build . -t host_arazafin:p1
 ```
+
+or run this command from anywhere:
+
+```bash
+docker build -t host_arazafin:p1 - <<EOF
+FROM docker.io/alpine:3.23
+RUN apk update && apk add --no-cache busybox
+ENTRYPOINT [ "/bin/sh" ]
+EOF
+```

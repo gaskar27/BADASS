@@ -19,3 +19,15 @@ Go to the directory containing the Dockerfile and run the following command:
 ```bash
 docker build . -t router_arazafin:p1
 ```
+
+or run this command from anywhere:
+
+```bash
+docker build -t router_arazafin:p1 - <<EOF
+FROM docker.io/frrouting/frr:v8.4.0
+RUN apk update
+RUN sed -i 's/^bgpd=no/bgpd=yes/' /etc/frr/daemons \
+    && sed -i 's/^ospfd=no/ospfd=yes/' /etc/frr/daemons \
+    && sed -i 's/^isisd=no/isisd=yes/' /etc/frr/daemons
+EOF
+```
