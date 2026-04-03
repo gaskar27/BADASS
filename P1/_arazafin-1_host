@@ -1,0 +1,18 @@
+## This is the Dockerfile for the host
+
+```Dockerfile
+FROM docker.io/alpine:3.23
+
+RUN apk update && apk add --no-cache busybox
+
+ENTRYPOINT [ "/bin/sh" ]
+```
+
+
+## Build the image
+
+Go to the directory containing the Dockerfile and run the following command:
+
+```bash
+docker build . -t host_arazafin:p1
+```
