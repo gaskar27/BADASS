@@ -1,0 +1,38 @@
+## Give an IP address for the router
+
+Use this command when the router is on
+
+```bash
+ip addr add 10.0.0.2/24 dev eth0
+ip link set eth0 up
+```
+to make the change permanent, copy this following snippet in `/etc/network/interfaces` or add this on `edit config` in the gns3 interface
+
+```txt
+auto eth0
+iface eth0 inet static
+	address 10.0.0.2
+	netmask 255.255.255.0
+	up ip link set eth0 up
+```
+
+## Setup VXLAN
+
+```Bash
+ip link add vxlan10 type vxlan id 10 remote 10.0.0.1 local 10.0.0.2 dstport 4789 dev eth0
+ip link add vxlan10 type vxlan id 10 remote 10.0.0.1 local 10.0.0.2 dstport 8472 dev eth0
+ip link add vxlan10 type vxlan id 10 group 239.1.1.10 dev eth0 dstport 4789
+
+ip link set vxlan10 up
+ip link add br0 type bridge
+ip link set br0 up
+ip link set eth1 up
+
+brctl addif br0 eth1
+brctl addif br0 vxlan10
+ip link set eth1 master br0
+ip link set vxlan10 master br0
+
+#table FDB
+bridge fdb append 00:00:00:00:00:00 dev vxlan10 dst 10.1.1.2
+```
