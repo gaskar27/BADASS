@@ -1,14 +1,13 @@
 ## This is the Dockerfile for the router
 
 ```Dockerfile
-FROM docker.io/frrouting/frr:v8.4.0
+FROM quay.io/frrouting/frr:10.6.0
 
 RUN apk update
 
 RUN sed -i 's/^bgpd=no/bgpd=yes/' /etc/frr/daemons \
     && sed -i 's/^ospfd=no/ospfd=yes/' /etc/frr/daemons \
     && sed -i 's/^isisd=no/isisd=yes/' /etc/frr/daemons
-
 ```
 
 
@@ -24,7 +23,7 @@ or run this command from anywhere:
 
 ```bash
 docker build -t router_arazafin:p1 - <<EOF
-FROM docker.io/frrouting/frr:v8.4.0
+FROM quay.io/frrouting/frr:10.6.0
 RUN apk update
 RUN sed -i 's/^bgpd=no/bgpd=yes/' /etc/frr/daemons \
     && sed -i 's/^ospfd=no/ospfd=yes/' /etc/frr/daemons \
