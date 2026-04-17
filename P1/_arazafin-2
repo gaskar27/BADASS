@@ -1,4 +1,4 @@
-## This is the Dockerfile for the router
+## Dockerfile for the router
 
 ```Dockerfile
 FROM quay.io/frrouting/frr:10.6.0
@@ -9,7 +9,6 @@ RUN sed -i 's/^bgpd=no/bgpd=yes/' /etc/frr/daemons \
     && sed -i 's/^ospfd=no/ospfd=yes/' /etc/frr/daemons \
     && sed -i 's/^isisd=no/isisd=yes/' /etc/frr/daemons
 ```
-
 
 ## Build the image
 

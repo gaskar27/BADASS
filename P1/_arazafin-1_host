@@ -8,7 +8,6 @@ RUN apk update && apk add --no-cache busybox
 ENTRYPOINT [ "/bin/sh" ]
 ```
 
-
 ## Build the image
 
 Go to the directory containing the Dockerfile and run the following command:
