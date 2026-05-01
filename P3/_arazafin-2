@@ -1,0 +1,52 @@
+
+```sh
+# Creation of vxlan10
+ip link add vxlan10 type vxlan id 10 local 1.1.1.2 dstport 4789 dev eth0
+ip link set vxlan10 up
+ip link add br0 type bridge
+ip link set br0 up
+ip link set eth1 master br0
+ip link set vxlan10 master br0
+
+vtysh
+
+conf t
+
+# --- Interface Configuration ---
+# Configure the Loopback interface (BGP/VXLAN endpoint)
+interface lo
+ ip address 1.1.1.2/32
+
+# Configure the physical interface connected to the network core (Underlay)
+interface eth0
+ ip address 10.1.1.2/30
+
+# --- OSPF Underlay Configuration ---
+# OSPF ensures that this router can reach the Route Reflector (1.1.1.1)
+router ospf
+ # Advertise the link to the core
+ network 10.1.1.0/30 area 0
+ # Advertise the Loopback so others can find this VTEP
+ network 1.1.1.2/32 area 0
+
+# --- BGP Overlay Configuration ---
+router bgp 65000
+ # Unique ID for this router (matches Loopback)
+ bgp router-id 1.1.1.2
+ 
+ # Define the neighbor (The Route Reflector server 1.1.1.1)
+ neighbor 1.1.1.1 remote-as 65000
+ # Use Loopback as the source for the BGP session for stability
+ neighbor 1.1.1.1 update-source lo
+
+ # --- EVPN Address Family ---
+ # This section handles the exchange of MAC and IP addresses over BGP
+ address-family l2vpn evpn
+  # Activate EVPN route exchange with the Route Reflector
+  neighbor 1.1.1.1 activate
+  
+  # Crucial: Automatically export all local VXLAN VNIs into BGP EVPN
+  # This tells other routers: "I have VNI 10 here, send traffic to 1.1.1.2"
+  advertise-all-vni
+ exit-address-family
+```

@@ -1,0 +1,33 @@
+```sh
+ip link add vxlan10 type vxlan id 10 local 1.1.1.4 dstport 4789 dev eth0
+ip link set vxlan10 up
+ip link add br0 type bridge
+ip link set br0 up
+ip link set eth0 master br0
+ip link set vxlan10 master br0
+
+vtysh
+conf t
+
+interface lo
+  ip address 1.1.1.4/32
+
+interface eth2
+  ip address 10.1.1.10/30
+
+router ospf
+ network 10.1.1.8/30 area 0
+ network 1.1.1.4/32 area 0
+
+conf t
+router bgp 65000
+ bgp router-id 1.1.1.4
+ neighbor 1.1.1.1 remote-as 65000
+ neighbor 1.1.1.1 update-source lo
+
+ address-family l2vpn evpn
+  neighbor 1.1.1.1 activate
+  advertise-all-vni
+ exit-address-family
+exit
+```

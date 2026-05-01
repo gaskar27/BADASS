@@ -1,0 +1,59 @@
+```sh
+# Enter the FRRouting VTY shell
+vtysh
+
+# Enter Global Configuration mode
+conf t
+
+# --- Interface Configuration ---
+
+# Configure the Loopback interface (used as the stable BGP Router-ID and source)
+interface lo
+ ip address 1.1.1.1/32
+
+# Configure physical point-to-point links (Underlay)
+interface eth0
+ ip address 10.1.1.1/30
+
+interface eth1
+ ip address 10.1.1.5/30
+
+interface eth2
+ ip address 10.1.1.9/30
+
+# --- OSPF Underlay Configuration ---
+# OSPF is used here to provide reachability between Loopback addresses
+router ospf
+ # Define which networks participate in OSPF Area 0 (Backbone)
+ network 10.1.1.0/30 area 0
+ network 10.1.1.4/30 area 0
+ network 10.1.1.8/30 area 0
+ network 1.1.1.1/32 area 0
+
+# --- BGP Overlay Configuration ---
+router bgp 65000
+ # Unique identifier for this BGP speaker
+ bgp router-id 1.1.1.1
+ 
+ # Define a Peer-Group to act as a template for multiple neighbors
+ neighbor VTEPS peer-group
+ neighbor VTEPS remote-as 65000
+ # Use Loopback IP to establish sessions (provides stability if physical links flap)
+ neighbor VTEPS update-source lo
+ # Set this router as the Route Reflector Server for the group
+ neighbor VTEPS route-reflector-client
+
+ # Manually bind specific neighbors to the VTEPS peer-group
+ neighbor 1.1.1.2 peer-group VTEPS
+ neighbor 1.1.1.3 peer-group VTEPS
+ neighbor 1.1.1.4 peer-group VTEPS
+
+ # --- EVPN Specifics ---
+ # Address-family used to carry MAC/IP reachability for VXLAN
+ address-family l2vpn evpn
+  # Enable EVPN capability for all members of the VTEPS group
+  neighbor VTEPS activate
+  # Reflect EVPN routes to clients (standard RR behavior for this family)
+  neighbor VTEPS route-reflector-client
+ exit-address-family
+```
